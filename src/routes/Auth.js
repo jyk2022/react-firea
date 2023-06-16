@@ -1,54 +1,33 @@
 import React, { useState } from 'react';
-import { authService } from 'fbinstanc';
+import { authService, firebaseInstance } from 'fbinstanc';
+import AuthForm from 'componets/AuthForm';
 
 const Auth = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [newAccount, setNewAccount] = useState(true);
-
-    const onChange = (event) => {
+    const onSocialClick = async (event) => {
         console.log(event.target.name);
         const {
-            target: { name, value },
+            target: { name },
         } = event;
-        if (name === 'email') {
-            setEmail(value);
-        } else if (name === 'password') {
-            setPassword(value);
+        let provider;
+        if (name === 'google') {
+            provider = new firebaseInstance.auth.GoogleAuthProvider();
+        } else if (name === 'github') {
+            provider = new firebaseInstance.auth.GithubAuthProvider();
         }
-    };
-    const onSubmit = async (event) => {
-        event.preventDefault();
-        try {
-            let data;
-            if (newAccount) {
-                data = await authService.createUserWithEmailAndPassword(email, password);
-            } else {
-                data = await authService.createUserWithEmailAndPassword(email, password);
-            }
-            console.log(data);
-        } catch (error) {
-            console.log(error);
-        }
+        const data = await authService.signInWithPopup(provider);
+        console.log(data);
     };
 
     return (
         <>
-            <form onSubmit={onSubmit}>
-                <input type="text" name="email" placeholder="Email" required value={email} onChange={onChange} />
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    required
-                    value={password}
-                    onChange={onChange}
-                />
-                <input type="submit" value="Log In" value={newAccount ? 'Create Account' : 'Log In'} />
-            </form>
+            <AuthForm />
             <div>
-                <button>구글로 로그인하기</button>
-                <button>깃허브로 로그인하기</button>
+                <button onClick={onSocialClick} name="google">
+                    구글로 로그인하기
+                </button>
+                <button onClick={onSocialClick} name="github">
+                    깃허브로 로그인하기
+                </button>
             </div>
         </>
     );
